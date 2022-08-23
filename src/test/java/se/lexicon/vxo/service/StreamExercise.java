@@ -89,7 +89,7 @@ public class StreamExercise {
         int expectedSize = 8882;
         Set<LocalDate> dates = null;
 
-        dates = new TreeSet<>(PeopleImpl.getInstance().getAllBirthDate());
+        dates = PeopleImpl.getInstance().getAllBirthDate();
 
         //Assert
         assertNotNull(dates);
@@ -107,10 +107,7 @@ public class StreamExercise {
         Person[] result = null;
 
         Function<String, List<Person>> personList = PeopleImpl.getInstance()::findByFirstOrLastName;
-        List<Person> persons = personList.apply("Erik");
-
-        result = new Person[persons.size()];
-        result = persons.toArray(result);
+        result = personList.apply("Erik").toArray(Person[]::new);
 
         //Assert
         assertNotNull(result);
@@ -124,7 +121,7 @@ public class StreamExercise {
     public void task7(){
         Person expected = new Person(5436, "Tea", "Håkansson", LocalDate.parse("1968-01-25"), Gender.FEMALE);
 
-        Optional<Person> optional = null;
+        Optional<Person> optional;
 
         optional = PeopleImpl.getInstance().findById(5436);
 
@@ -141,7 +138,7 @@ public class StreamExercise {
     public void task8(){
         LocalDate expectedBirthDate = LocalDate.parse("1910-01-02");
 
-        Optional<Person> optional = null;
+        Optional<Person> optional;
 
         Set<Person> personSet = PeopleImpl.getInstance().findAllHavingBirthDate();
         optional = personSet.stream().min(Comparator.comparing(Person::getDateOfBirth));
@@ -199,7 +196,7 @@ public class StreamExercise {
         double expected = 54.42;
         double averageAge = 0;
 
-        averageAge = PeopleImpl.getInstance().getAgeAverage().getAsDouble();
+        averageAge = people.stream().mapToInt(personToAge).average().orElse(0);
 
         //Assert
         assertTrue(averageAge > 0);
@@ -248,24 +245,35 @@ public class StreamExercise {
     public void task14(){
         LocalDate[] _2020_dates = null;
 
-        ArrayList<LocalDate> days = new ArrayList<>();
-
         LocalDate initialValue = LocalDate.parse("2020-01-01");
         long limitDays = initialValue.isLeapYear() ? 366L : 365L;
         long nextValue = 1L;
 
-        Stream.iterate(initialValue, date -> date.plusDays(nextValue))
+        _2020_dates = Stream.iterate(initialValue, date -> date.plusDays(nextValue))
                 .limit(limitDays)
-                .forEach(days::add);
-
-        _2020_dates = new LocalDate[days.size()];
-        _2020_dates = days.toArray(_2020_dates);
+                .toArray(LocalDate[]::new);
 
         //Assert
         assertNotNull(_2020_dates);
         assertEquals(366, _2020_dates.length);
         assertEquals(LocalDate.parse("2020-01-01"), _2020_dates[0]);
         assertEquals(LocalDate.parse("2020-12-31"), _2020_dates[_2020_dates.length-1]);
+    }
+
+    /**
+     * Get average age of all People
+     * Added by student
+     */
+    @Test
+    public void task15(){
+        double expected = 57.0885;
+        double averageAge = 0;
+
+        averageAge = PeopleImpl.getInstance().getAgeAverage().orElse(0.0);
+
+        //Assert
+        assertTrue(averageAge > 0);
+        assertEquals(expected, averageAge, .01);
     }
 
 }
